@@ -1,0 +1,36 @@
+[tasks.lambda-dev.env]
+DEBUG = true
+AWS_VAULT_BACKEND = "pass"
+AWS_VAULT_PASS_PREFIX = "aws"
+AWS_DEFAULT_REGION = "eu-west-1"
+
+[tasks.lambda-dev]
+description = "Build lambda using cross-compilation"
+command = "aws-vault"
+args = ["exec", "terraform", "--", "cargo", "run"]
+
+[tasks.lambda-dev-build]
+description = "Build lambda using cross-compilation"
+command = "cargo"
+args = ["build"]
+
+[tasks.lambda]
+description = "Build lambda using cross-compilation"
+command = "podman"
+args = [
+    "run", "-ti", "--rm",
+    "-v", "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}:/opt/build",
+    "-v", "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/cache:/usr/local/cargo/registry:rw",
+    "-w", "/opt/build",
+    "rust-aws",
+    "/bin/sh", "-c", "cargo build --release --target=x86_64-unknown-linux-musl -p lambda"
+]
+
+[tasks.copy-lambda]
+description = "Push compiled lambda to distribution directory for terraform"
+command = "bash"
+args = [
+    "-c",
+    "cd ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/x86_64-unknown-linux-musl/release/ && 7z a -mx5 -tzip ${TERRAFORM_DIR}/feederito.zip bootstrap"
+]
+

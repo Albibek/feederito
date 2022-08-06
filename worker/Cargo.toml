@@ -1,0 +1,59 @@
+[package]
+name = "worker"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "worker"
+path="src/main.rs"
+
+[lib]
+name="worker"
+path="src/lib.rs"
+
+[dependencies]
+im = "^15"
+
+futures = { version = "^0.3", default-features = false, features = ["std"]}
+
+anyhow = "^1.0"
+serde = "^1.0"
+serde_json = "^1.0"
+argon2 = { version = "^0.4", features = ["alloc"]}
+aes-gcm = "^0.9"
+base64ct = { version = "^1.5", features = ["std"]}
+
+console_error_panic_hook = "0.1.7"
+console_log = "0.2.0"
+log = "0.4.14"
+
+wee_alloc = "^0.4"
+gloo-net = { version = "^0.2", default-features = false, features = ["http"] }
+gloo-worker = { version = "^0.2", features = ["futures"] }
+gloo-storage = "^0.2"
+
+wasm-bindgen = { version = "^0.2", default-features = false, features = ["serde-serialize"] }
+wasm-bindgen-futures = { version = "^0.4" }
+web-sys = { version = "^0.3", features = ["IdbFactory", "IdbDatabase", "IdbOpenDbRequest", "IdbRequest", "IdbObjectStore", "IdbTransaction", "Storage", "Crypto", "WorkerGlobalScope"]}
+indexed_db_futures = "^0.2"
+js-sys = "^0.3"
+
+hmac = "^0.12"
+sha2 = "^0.10"
+#aws-sigv4 = { version = "^0.9", default-features = false, features = [] }
+
+#[features]
+#aws-sigv4 = ["aws_smithy_types?/*"]
+
+#[lib]
+#crate-type = ["cdylib", "rlib"]
+
+#[package.metadata.wasm-pack.profile.release]
+#wasm-opt = ['-Os']
+
+
+[package.metadata.frontend.profile.release]
+panic = 'abort'
+codegen-units = 1
+opt-level = 'z' # 's' or 'z' to optimize "aggressively" for size
+lto = true

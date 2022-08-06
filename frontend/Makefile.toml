@@ -1,0 +1,26 @@
+[tasks.frontend]
+env = { CARGO_TARGET_DIR = "frontend_target" }
+description = "Build frontend with trunk"
+install_crate = { crate_name = "trunk", binary = "trunk", test_arg = "-V" }
+command = "trunk"
+#args = ["build", "--target", "web", "--out-name", "package", "--dev", "frontend", "--", "--target-dir", "frontend_target"]
+args = ["build", "-d", "../static"]
+
+[tasks.frontend-release]
+description = "Build a release frontend with trunk"
+install_crate = { crate_name = "trunk", binary = "trunk", test_arg = "-V" }
+command = "trunk"
+#args = ["build", "--target", "web", "--out-name", "package", "--dev", "frontend", "--", "--target-dir", "frontend_target"]
+args = ["build", "-d", "../static", "--release", "index.html"]
+
+[tasks.serve]
+env = { CARGO_TARGET_DIR = "frontend_target" }
+description = "Start server with frontend"
+command = "trunk"
+args = ["serve", "-d", "../static", "--port", "${PORT}", "--no-autoreload", "-w", 'dist' ]
+dependencies = ["frontend"]
+
+[tasks.docs]
+description = "Generate documentation"
+command = "cargo"
+args = ["doc", "--target-dir", "../target"]

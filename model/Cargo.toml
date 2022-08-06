@@ -1,0 +1,21 @@
+[package]
+name = "model"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "^1.0"
+
+serde_json = "^1.0"
+serde = { version = "^1.0", features = ["serde_derive"] }
+
+#tracing = { version = "^0.1", features = ["release_max_level_info", "max_level_trace"] }
+
+rss = { version = "^2.0", features = ["with-serde"], optional = true }
+atom_syndication = { version = "^0.11", features = ["with-serde"], optional = true }
+xxhash-rust = { version = "^0.8", features = ["xxh3"], optional = true}
+chrono = { version = "^0.4", optional = true }
+
+[features]
+default = []
+backend = ["rss", "atom_syndication", "xxhash-rust", "chrono"]

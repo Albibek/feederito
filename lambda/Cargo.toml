@@ -1,0 +1,37 @@
+[package]
+name = "lambda"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+model = { path = "../model", features = ["backend"] }
+
+aws-config = "^0.10"
+aws-types = "^0.10"
+aws-sdk-dynamodb = "^0.10"
+serde_dynamo = { version = "3", features = ["aws-sdk-dynamodb+0_10"] }
+lambda_runtime = "^0.5"
+anyhow = "^1.0"
+
+serde_json = "^1.0"
+serde = { version = "^1.0", features = ["serde_derive"] }
+tokio = { version = "^1.0", features = ["rt"]}
+hyper = { version = "^0.14", features = ["client", "http1", "http2", "stream" ] }
+hyper-rustls = { version = "^0.23", features = ["tls12", "rustls-native-certs"] }
+
+tracing = { version = "^0.1", features = ["release_max_level_debug", "max_level_trace"] }
+tracing-subscriber = { version = "^0.3", features = ["env-filter", "registry"] }
+
+rss = { version = "^2.0", features = ["with-serde"] }
+atom_syndication = { version = "^0.11", features = ["with-serde"] }
+xxhash-rust = { version = "^0.8", features = ["xxh3"] }
+chrono = "^0.4"
+
+[dev-dependencies]
+hyper = { version = "^0.14", features = ["client", "http1", "http2", "stream", "server" ] }
+
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"

@@ -1,0 +1,105 @@
+[env]
+PORT = "8000"
+TERRAFORM_DIR = "~/projects/platform/aws/modules/rss/files/"
+CARGO_TARGET_DIR = "other_target"
+
+[config]
+skip_core_tasks = true
+default_to_workspace = false
+
+# ---- BASIC ----
+
+#[tasks.watch]
+#description = "Watch files and recompile the project on change"
+#run_task = [
+    #{ name = "build" },
+#]
+#watch = true
+
+[tasks.serve]
+#env = { CARGO_TARGET_DIR = "frontend_target" }
+description = "Start server with frontend"
+command = "trunk"
+args = ["serve", "--no-autoreload"]
+#dependencies = ["frontend", "lambda-dev"]
+#dependencies = [ "style-generate" ]
+
+#[tasks.verify]
+#description = "Format, lint with Clippy and run tests"
+#dependencies = ["fmt", "clippy", "test_h_firefox"]
+
+# ---- BUILD ----
+
+[tasks.frontend]
+#install_crate = { crate_name = "trunk", binary = "trunk", test_arg = "-V" }
+#command = "bash"
+##args = ["build", "--target", "web", "--out-name", "package", "--dev", "frontend", "--", "--target-dir", "frontend_target"]
+#args = ["cd frontend && trunk build frontend"]
+command = "cargo"
+args = [ "make", "--cwd", "frontend", "frontend"]
+
+[tasks.style-generate]
+command = "cargo"
+args = ["run", "-p", "styler", "--", "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/"]
+
+[tasks.frontend-release]
+command = "cargo"
+args = ["make", "--cwd", "frontend", "frontend-release"]
+
+[tasks.frontend-docs]
+command = "cargo"
+args = ["make", "--cwd", "frontend", "docs"]
+
+[tasks.lambda-dev]
+description = "Build lambda for local development"
+command = "cargo"
+args = ["make", "--cwd", "lambda", "lambda-dev"]
+
+[tasks.lambda]
+command = "cargo"
+args = ["make", "--cwd", "lambda", "lambda"]
+
+[tasks.copy-lambda]
+command = "cargo"
+args = ["make", "--cwd", "lambda", "copy-lambda"]
+
+#[tasks.cargo-update-lambda]
+#command = "cargo"
+#args = ["make", "--cwd", "lambda", "update"]
+
+#[tasks.cargo-update]
+#dependencies = [""]
+
+# ---- LINT ----
+
+#[tasks.clippy]
+#description = "Lint with Clippy"
+#install_crate = { rustup_component_name = "clippy", binary = "cargo-clippy", test_arg = "--help" }
+#command = "cargo"
+#args = ["clippy", "--all-features", "--", "--deny", "warnings", "--deny", "clippy::pedantic", "--deny", "clippy::nursery"]
+
+#[tasks.fmt]
+#description = "Format with rustfmt"
+#install_crate = { rustup_component_name = "rustfmt", binary = "rustfmt", test_arg = "-V" }
+#command = "cargo"
+#args = ["fmt"]
+
+
+## ---- TEST ----
+
+#[tasks.test_h]
+#description = "Run headless tests. Ex: 'cargo make test_h firefox'. Test envs: [chrome, firefox, safari]"
+#extend = "test"
+#args = ["test", "--headless", "--${@}"]
+
+#[tasks.test_h_firefox]
+#description = "Run headless tests with Firefox."
+#extend = "test"
+#args = ["test", "--headless", "--firefox"]
+
+#[tasks.test]
+#description = "Run tests. Ex: 'cargo make test firefox'. Test envs: [chrome, firefox, safari]"
+#install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V" }
+#command = "wasm-pack"
+#args = ["test", "--${@}"]
+
