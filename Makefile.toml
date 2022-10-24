@@ -24,6 +24,12 @@ args = ["serve", "--no-autoreload"]
 #dependencies = ["frontend", "lambda-dev"]
 #dependencies = [ "style-generate" ]
 
+[tasks.serve-release]
+#env = { CARGO_TARGET_DIR = "frontend_target" }
+description = "Start server with frontend"
+command = "trunk"
+args = ["serve", "--no-autoreload", "--release"] 
+
 #[tasks.verify]
 #description = "Format, lint with Clippy and run tests"
 #dependencies = ["fmt", "clippy", "test_h_firefox"]

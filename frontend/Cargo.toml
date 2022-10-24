@@ -29,7 +29,6 @@ console_error_panic_hook = "0.1.7"
 console_log = "0.2.0"
 log = "0.4.14"
 
-wee_alloc = "^0.4"
 gloo-worker = { version = "^0.2", features = ["futures"] }
 gloo-storage = "^0.2"
 wasm-bindgen = { version = "^0.2", default-features = false, features = ["serde-serialize"] }
