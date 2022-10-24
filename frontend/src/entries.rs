@@ -381,18 +381,17 @@ fn parse_description<'a>(description: &'a str) -> String {
     // parsing trees in Rust is hard, so we'll replace it with filtering only
 
     let mut reader = Reader::from_str(description);
-    let mut buf = Vec::new();
     let mut result = String::new();
 
     loop {
-        match reader.read_event(&mut buf) {
-            Ok(Event::Start(ref e)) => match e.name() {
+        match reader.read_event() {
+            Ok(Event::Start(ref e)) => match e.name().as_ref() {
                 name @ b"a" => {
                     let mut after = String::new();
                     // for now only allow h single href attribute
                     for attr in e.attributes() {
                         if let Ok(attr) = attr {
-                            if attr.key == b"href" {
+                            if attr.key.as_ref() == b"href" {
                                 after.push_str(" href=\"");
                                 after.push_str(&String::from_utf8_lossy(&attr.value));
                                 after.push('"');
@@ -406,27 +405,16 @@ fn parse_description<'a>(description: &'a str) -> String {
                     push_tag(&mut result, "", name, "");
                 }
             },
-            Ok(Event::Empty(e)) => push_tag(&mut result, "", e.name(), "/"),
-            Ok(Event::End(e)) => push_tag(&mut result, "", e.name(), ""),
-            Ok(Event::Text(e)) => result.push_str(
-                &e.unescape_and_decode(&reader)
-                    .unwrap_or("BAD HTML".to_string()),
-            ),
+            Ok(Event::Empty(e)) => push_tag(&mut result, "", e.name().as_ref(), "/"),
+            Ok(Event::End(e)) => push_tag(&mut result, "", e.name().as_ref(), ""),
+            Ok(Event::Text(e)) => result.push_str(&e.unescape().unwrap_or("BAD HTML".into())),
             Ok(Event::CData(text)) => {
                 result.push_str("<![CDATA[");
-                result.push_str(
-                    &text
-                        .unescaped()
-                        .as_ref()
-                        .map(|s| String::from_utf8_lossy(s))
-                        .unwrap_or(std::borrow::Cow::Borrowed("BAD HTML")),
-                );
+                result.push_str(&String::from_utf8_lossy(text.as_ref()));
                 result.push_str("...]]>");
             }
             Err(_e) => {
-                result =
-                    String::from_utf8_lossy(&quick_xml::escape::escape(description.as_bytes()))
-                        .to_string();
+                result = quick_xml::escape::escape(description).to_string();
                 break;
             }
             Ok(Event::Eof) => break,

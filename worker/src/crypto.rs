@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Error};
 
-use aes_gcm::aead::{Aead, NewAead};
+use aes_gcm::aead::{Aead, KeyInit};
 use aes_gcm::{Aes256Gcm, Nonce};
 use argon2::{password_hash::Salt, Argon2};
 use base64ct::{Base64, Encoding};
