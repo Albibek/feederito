@@ -21,7 +21,7 @@ pub struct EntryID(pub u64);
 pub struct StoredEntry {
     // internal properties of database
     pub entry_id: EntryID,
-    feed_id: FeedID,
+    pub feed_id: FeedID,
 
     pub published: u64,
     // id provided with feed

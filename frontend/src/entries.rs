@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::ops::Deref;
 
 use dioxus::fermi::hooks::*;
@@ -176,15 +177,22 @@ fn handle_action(action: EntriesAction, atom_entries: UseAtomRef<DisplayedEntrie
     // will be double mutable borrowing
     match action {
         EntriesAction::Replace(mut new_entries) => {
+            // sometimes entries are duplicated in feeds, so we need
+            // to filter them out because UI requires uniques and we don't want to read dups
+            // anyways
+            let mut duplicates = HashSet::new();
             let mut entries = atom_entries.write();
             entries.unread.clear();
             while let Some(entry) = new_entries.pop() {
                 let unread = entry.read_ts == 0;
 
-                entries.unread.insert_ord(Entry {
-                    stored: entry,
-                    unread,
-                });
+                if !duplicates.contains(&entry.entry_id) {
+                    duplicates.insert(entry.entry_id.clone());
+                    entries.unread.insert_ord(Entry {
+                        stored: entry,
+                        unread,
+                    });
+                }
             }
         }
 
@@ -211,12 +219,11 @@ fn handle_action(action: EntriesAction, atom_entries: UseAtomRef<DisplayedEntrie
             while entries.read.len() > MAX_READ_ENTRIES {
                 entries.read.pop_back();
             }
-
-            warn!("MarkPendingRead OK");
         }
 
         EntriesAction::MarkFinallyReadUnread(mut marked) => {
             let mut entries = atom_entries.write();
+
             while let Some((entry_id, published, read_ts)) = marked.pop() {
                 let list = if read_ts == 0 {
                     // message was about entry marked unread
@@ -234,6 +241,7 @@ fn handle_action(action: EntriesAction, atom_entries: UseAtomRef<DisplayedEntrie
                 }
             }
         }
+
         EntriesAction::MarkPendingUnread(entry_id, published) => {
             let mut entries = atom_entries.write();
             if let Some(pos) = entries
@@ -288,6 +296,7 @@ pub fn Entries(cx: Scope) -> Element {
     let entries = use_atom_ref(&cx, ENTRIES);
     let entries_handle = use_context::<EntriesHandle>(&cx).unwrap().to_owned();
     let entries: &DisplayedEntries = &entries.read();
+
     let entry_nodes = entries.unread.iter().map(|entry| {
         let link = entry.stored.link.clone().unwrap_or_default();
         let title = entry.stored.title.clone().unwrap_or_default();
@@ -299,7 +308,7 @@ pub fn Entries(cx: Scope) -> Element {
         let read = entry.stored.read_ts != 0;
         let key = id.0.clone();
 
-        rsx!(
+       rsx!(
         p {
             key: "{key}",
             div {
