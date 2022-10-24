@@ -19,7 +19,7 @@ im = "^15"
 
 futures-util = "^0.3"
 futures = { version = "^0.3", default-features = false, features = ["std", "executor"]}
-quick-xml = "^0.22"
+quick-xml = "^0.26"
 
 anyhow = "^1.0"
 serde = "^1.0"
