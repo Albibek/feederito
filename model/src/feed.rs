@@ -7,7 +7,7 @@ use atom_syndication::Feed as AtomFeed;
 #[cfg(feature = "backend")]
 use rss::Channel;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Copy, Hash)]
 #[serde(transparent)]
 pub struct FeedID(pub u64);
 

@@ -12,6 +12,7 @@ use worker::WorkerStatus;
 
 use crate::aws::*;
 use crate::entries::*;
+use crate::feeds::*;
 
 //use crate::util::*;
 
@@ -25,8 +26,10 @@ fn main() {
 fn app(cx: Scope) -> Element {
     init_worker_state_actor(&cx);
     init_entries_actor(&cx);
+    init_feeds_actor(&cx);
 
     let entries_handle = use_context::<EntriesHandle>(&cx).unwrap().to_owned();
+    let feeds_handle = use_context::<FeedsHandle>(&cx).unwrap().to_owned();
 
     let login_settings = use_atom_state(&cx, LOGIN_SETTINGS);
     let worker_status = use_read(&cx, WORKER_STATUS);
@@ -49,7 +52,9 @@ fn app(cx: Scope) -> Element {
                     button {
                         class: button_style,
                         onclick: move |_| entries_handle.read().handle_refresh(),  "Refresh" }
-
+                    button {
+                        class: button_style,
+                        onclick: move |_| feeds_handle.read().handle_fetch_feeds(),  "Feeds" }
                     //button {
                         //class: "f6 link dim br3 ba ph3 pv2 mb2 dib dark-blue",
                         //onclick: move |_| entries_handle.read().handle_undo(&cx),  "Undo" }
@@ -71,8 +76,7 @@ fn app(cx: Scope) -> Element {
                         class: "fl w-20",
                         //style: "height: 80vh",
                         nav {
-                            "TODO feeds"
-                        //Feeds {}
+                           Feeds {}
                         }
                     }
                     div {

@@ -11,8 +11,9 @@ use log::{trace, warn};
 
 use model::entry::*;
 use model::events::*;
-use model::feed::*;
+use model::feed::FeedID;
 
+use crate::feeds::FEEDS;
 use crate::WORKER_BRIDGE;
 use worker::{BackendWorker, WorkerRequest, WorkerResponse};
 
@@ -21,6 +22,7 @@ use worker::{BackendWorker, WorkerRequest, WorkerResponse};
 // breaking the action based encapsulation.
 // Probably could've had it stored locally, inside the component, but not sure it would work
 static ENTRIES: AtomRef<DisplayedEntries> = |_| DisplayedEntries::default();
+static FILTER: AtomRef<Vec<FeedID>> = |_| Vec::new();
 static MAX_READ_ENTRIES: usize = 20;
 
 #[derive(PartialEq, Eq, Clone)]
@@ -294,10 +296,21 @@ fn handle_action(action: EntriesAction, atom_entries: UseAtomRef<DisplayedEntrie
 #[allow(non_snake_case)]
 pub fn Entries(cx: Scope) -> Element {
     let entries = use_atom_ref(&cx, ENTRIES);
+    let feeds = use_atom_ref(&cx, FEEDS);
+    let mut enabled = HashSet::new();
+    let feeds = &feeds.read().feeds;
+    for feed in feeds.iter() {
+        if feed.enabled {
+            enabled.insert(feed.stored.feed_id);
+        }
+    }
     let entries_handle = use_context::<EntriesHandle>(&cx).unwrap().to_owned();
     let entries: &DisplayedEntries = &entries.read();
 
-    let entry_nodes = entries.unread.iter().map(|entry| {
+    let entry_nodes = entries.unread.iter().filter_map(|entry| {
+        if !enabled.contains(&entry.stored.feed_id) {
+            return None
+        }
         let link = entry.stored.link.clone().unwrap_or_default();
         let title = entry.stored.title.clone().unwrap_or_default();
 
@@ -308,7 +321,9 @@ pub fn Entries(cx: Scope) -> Element {
         let read = entry.stored.read_ts != 0;
         let key = id.0.clone();
 
-       rsx!(
+
+
+       Some(rsx!(
         p {
             key: "{key}",
             div {
@@ -328,7 +343,7 @@ pub fn Entries(cx: Scope) -> Element {
                 }
             }
         }
-        )
+        ))
     });
     cx.render(rsx! {
        entry_nodes
